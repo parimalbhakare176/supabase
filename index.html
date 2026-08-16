@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Database-backed ESG RAG research assistant using Supabase PostgreSQL, pgvector, BRSR and corporate sustainability disclosures.">
+<title>ESG RAG Intelligence — pgvector Sustainability Research</title>
+<link rel="icon" href="assets/logo.svg"><link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+<aside>
+  <div class="brand"><img src="assets/logo.svg" alt=""><div><b>ESG RAG</b><span>Vector intelligence</span></div></div>
+  <nav>
+    <button class="nav active" data-view="research">Research assistant</button>
+    <button class="nav" data-view="corpus">Corpus & provenance</button>
+    <button class="nav" data-view="evaluation">Retrieval evaluation</button>
+    <button class="nav" data-view="architecture">Architecture</button>
+  </nav>
+  <div class="db-card"><span id="dbDot"></span><div><b id="dbStatus">Checking database…</b><small id="dbMeta">Supabase PostgreSQL + pgvector</small></div></div>
+</aside>
+<main>
+<header>
+  <div><span class="eyebrow">SUSTAINABILITY INTELLIGENCE · BRSR · HYBRID RAG</span><h1 id="pageTitle">Evidence before generation.</h1></div>
+  <div class="actions"><a class="secondary" href="setup.html">Database setup</a><button id="theme">◐</button></div>
+</header>
+
+<section id="research" class="view active">
+  <div class="hero">
+    <div>
+      <span class="pill">POSTGRESQL · PGVECTOR · HYBRID SEARCH</span>
+      <h2>Ask real ESG disclosures. Trace every answer to the page.</h2>
+      <p>The system embeds your query with Supabase <b>gte-small</b>, fuses semantic vector similarity with PostgreSQL full-text search, and sends only the retrieved evidence to the generation layer.</p>
+    </div>
+    <div class="hero-kpis" id="heroKpis"></div>
+  </div>
+
+  <div class="workspace">
+    <div class="card query-card">
+      <div class="head"><div><span class="eyebrow">QUERY</span><h3>ESG research question</h3></div><span class="badge">HYBRID RRF</span></div>
+      <textarea id="question" placeholder="Compare Infosys and Reliance on climate-related performance. Highlight differences in reporting boundaries or years."></textarea>
+      <div class="control-grid">
+        <select id="sourceFilter"><option value="">All sources</option></select>
+        <select id="themeFilter"><option value="">All ESG themes</option></select>
+        <select id="topK"><option value="5">Top 5 evidence chunks</option><option value="8" selected>Top 8 evidence chunks</option><option value="12">Top 12 evidence chunks</option></select>
+        <button id="run" class="primary">Retrieve & answer →</button>
+      </div>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+
+    <div class="card answer-card">
+      <div class="head"><div><span class="eyebrow">GROUNDED RESPONSE</span><h3>Analysis</h3></div><span id="answerStatus" class="status">Ready</span></div>
+      <div id="answer" class="answer empty">The generated response will appear here. Claims must cite retrieved evidence IDs such as [E1] and [E2].</div>
+      <div class="answer-foot"><span>Generation uses a server-side OpenAI key; retrieval remains usable without it.</span><button id="copy">Copy</button></div>
+    </div>
+  </div>
+
+  <div class="card evidence-card">
+    <div class="head"><div><span class="eyebrow">RETRIEVAL TRACE</span><h3>Evidence supplied to generation</h3></div><span id="retrievalStatus" class="status">No query yet</span></div>
+    <div id="evidence" class="evidence empty-evidence">Run a query to inspect pgvector similarity, keyword relevance, RRF ranking, source document and PDF page.</div>
+  </div>
+</section>
+
+<section id="corpus" class="view">
+  <div class="intro"><span class="eyebrow">SOURCE GOVERNANCE</span><h2>Controlled corpus, explicit provenance.</h2><p>No synthetic ESG metrics are seeded into the source database. The ingestion function fetches only the allow-listed official document URLs stored in Supabase.</p></div>
+  <div id="corpusGrid" class="corpus-grid"></div>
+  <div class="card provenance">
+    <h3>Provenance contract</h3>
+    <div class="prov-grid">
+      <div><b>Original URL</b><span>Stored for every document</span></div>
+      <div><b>PDF page</b><span>Stored for every source chunk</span></div>
+      <div><b>SHA-256</b><span>Recorded for the source files used to establish the corpus</span></div>
+      <div><b>Embedding model</b><span>gte-small · 384 dimensions</span></div>
+      <div><b>Content type</b><span>source_excerpt only for public retrieval</span></div>
+      <div><b>Fabricated metrics</b><span>Not permitted in corpus ingestion</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="evaluation" class="view">
+  <div class="intro"><span class="eyebrow">RAG EVALUATION</span><h2>Measure retrieval rather than admiring the chatbot.</h2><p>The database contains ten expected-source evaluation questions. Run them against the live pgvector index after initialization.</p></div>
+  <div class="eval-controls"><button id="runEval" class="primary">Run live retrieval evaluation</button><span id="evalState">Not run in this browser session.</span></div>
+  <div class="eval-kpis" id="evalKpis"></div>
+  <div class="card table-wrap"><table><thead><tr><th>Question</th><th>Expected source(s)</th><th>Top retrieved source(s)</th><th>Hit@5</th></tr></thead><tbody id="evalTable"></tbody></table></div>
+</section>
+
+<section id="architecture" class="view">
+  <div class="intro"><span class="eyebrow">SYSTEM DESIGN</span><h2>A database-backed RAG pipeline you can explain.</h2></div>
+  <div class="pipeline">
+    <div><span>01</span><b>Official PDFs</b><small>SEBI, NSE, company disclosures</small></div><i>→</i>
+    <div><span>02</span><b>Controlled ingestion</b><small>Allow-listed URLs + page-aware chunking</small></div><i>→</i>
+    <div><span>03</span><b>Embeddings</b><small>Supabase gte-small · 384D</small></div><i>→</i>
+    <div><span>04</span><b>PostgreSQL + pgvector</b><small>HNSW vector + GIN full-text indexes</small></div><i>→</i>
+    <div><span>05</span><b>Hybrid RRF retrieval</b><small>Semantic + keyword fusion</small></div><i>→</i>
+    <div><span>06</span><b>Grounded generation</b><small>Only top-k evidence reaches the LLM</small></div>
+  </div>
+  <div class="arch-grid">
+    <div class="card"><span class="eyebrow">VECTOR DATABASE</span><h3>Real pgvector storage</h3><p>Document chunks are rows in PostgreSQL and embeddings are stored in a native <code>vector(384)</code> column. HNSW accelerates semantic nearest-neighbour search.</p></div>
+    <div class="card"><span class="eyebrow">KEYWORD RETRIEVAL</span><h3>PostgreSQL FTS</h3><p>A generated <code>tsvector</code> column and GIN index preserve exact ESG terminology such as Scope 3, BRSR Core and assurance.</p></div>
+    <div class="card"><span class="eyebrow">FUSION</span><h3>Reciprocal Rank Fusion</h3><p>Semantic and full-text result lists are merged using RRF so neither exact terminology nor semantic intent dominates by default.</p></div>
+    <div class="card"><span class="eyebrow">SECURITY</span><h3>RLS + server-side writes</h3><p>The browser receives only the public Supabase key. Database writes and retrieval logging happen inside JWT-protected Edge Functions using the service role.</p></div>
+    <div class="card"><span class="eyebrow">GROUNDING</span><h3>Evidence contract</h3><p>The generation endpoint is instructed to use only [E#] evidence, identify boundary/year differences and abstain when retrieval is insufficient.</p></div>
+    <div class="card"><span class="eyebrow">AUDITABILITY</span><h3>Retrieval logs</h3><p>Queries, filters, returned chunk IDs and retrieval latency are recorded server-side for future evaluation and debugging.</p></div>
+  </div>
+</section>
+
+<footer><span>ESG RAG Intelligence · portfolio research system</span><span>Public ESG disclosures · source-grounded · not investment advice</span></footer>
+</main>
+</div>
+<script src="config.js"></script><script src="app.js"></script>
+</body></html>

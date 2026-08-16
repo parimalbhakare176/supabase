@@ -1,0 +1,6 @@
+{
+  "name": "esg-rag-vector-db",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Supabase pgvector ESG RAG portfolio project"
+}

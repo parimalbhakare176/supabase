@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Initialize ESG RAG Database</title><link rel="stylesheet" href="styles.css"></head><body class="setup-body">
+<div class="setup-shell">
+<a href="index.html" class="back">← Back to ESG RAG</a>
+<div class="card setup-card"><span class="eyebrow">ONE-TIME DATABASE INITIALIZATION</span><h1>Fetch, chunk and embed the official ESG corpus.</h1>
+<p>This process calls the JWT-protected Supabase ingestion function. The function itself fetches only its allow-listed official PDF URLs; this browser does not upload or fabricate ESG content.</p>
+<div class="warning"><b>Keep this tab open until completion.</b> Reports are processed in small batches to stay within serverless execution limits. Re-running is safe: already-ingested page batches are skipped.</div>
+<button id="initialize" class="primary big">Initialize / resume database</button>
+<div id="overall" class="overall"></div><div id="sourceProgress" class="progress-list"></div>
+</div>
+<div class="card setup-card"><h3>What gets created</h3><div class="prov-grid">
+<div><b>Source chunks</b><span>Page-aware text from official PDFs</span></div>
+<div><b>384D embeddings</b><span>Supabase gte-small, mean pooled and normalized</span></div>
+<div><b>Vector index</b><span>PostgreSQL pgvector HNSW</span></div>
+<div><b>Keyword index</b><span>Generated tsvector + GIN</span></div>
+<div><b>Source citations</b><span>Document title, URL and page retained</span></div>
+<div><b>Retrieval logs</b><span>Query diagnostics for evaluation</span></div>
+</div></div>
+</div><script src="config.js"></script><script src="setup.js"></script></body></html>
