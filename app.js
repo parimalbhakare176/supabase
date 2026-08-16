@@ -2,6 +2,110 @@ const C=window.ESG_RAG_CONFIG,$=s=>document.querySelector(s),$$=s=>[...document.
 let DOCS=[],EVALS=[];
 const themes=["Climate & emissions","Energy","Water","Waste & circularity","Workforce","Governance & ethics","Privacy & cybersecurity","Assurance & reporting"];
 function esc(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function inlineMd(s){
+  return s
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\[E(\d+)\]/g, '<span class="cite-pill">[E$1]</span>');
+}
+
+function mdRow(line){
+  return line
+    .trim()
+    .replace(/^\||\|$/g, "")
+    .split("|")
+    .map(cell => inlineMd(cell.trim()));
+}
+
+function renderMarkdown(md){
+  const lines = esc(md).replace(/\r/g, "").split("\n");
+  let html = "";
+  let i = 0;
+  let inList = false;
+
+  function closeList(){
+    if(inList){
+      html += "</ul>";
+      inList = false;
+    }
+  }
+
+  while(i < lines.length){
+    const line = lines[i];
+
+    const tableSeparator =
+      i + 1 < lines.length &&
+      /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[i + 1]);
+
+    if(line.trim() && line.includes("|") && tableSeparator){
+      closeList();
+
+      const headers = mdRow(line);
+      i += 2;
+
+      const rows = [];
+
+      while(
+        i < lines.length &&
+        lines[i].trim() &&
+        lines[i].includes("|")
+      ){
+        rows.push(mdRow(lines[i]));
+        i++;
+      }
+
+      html += "<div class='md-table-wrap'><table class='md-table'><thead><tr>";
+      html += headers.map(h => `<th>${h}</th>`).join("");
+      html += "</tr></thead><tbody>";
+
+      html += rows
+        .map(row =>
+          "<tr>" +
+          row.map(cell => `<td>${cell}</td>`).join("") +
+          "</tr>"
+        )
+        .join("");
+
+      html += "</tbody></table></div>";
+      continue;
+    }
+
+    if(/^\s*[-*]\s+/.test(line)){
+      if(!inList){
+        html += "<ul>";
+        inList = true;
+      }
+
+      html += `<li>${inlineMd(
+        line.replace(/^\s*[-*]\s+/, "")
+      )}</li>`;
+
+      i++;
+      continue;
+    }
+
+    closeList();
+
+    if(!line.trim()){
+      i++;
+      continue;
+    }
+
+    if(/^###\s+/.test(line)){
+      html += `<h4>${inlineMd(line.replace(/^###\s+/, ""))}</h4>`;
+    } else if(/^##\s+/.test(line)){
+      html += `<h3>${inlineMd(line.replace(/^##\s+/, ""))}</h3>`;
+    } else if(/^#\s+/.test(line)){
+      html += `<h2>${inlineMd(line.replace(/^#\s+/, ""))}</h2>`;
+    } else {
+      html += `<p>${inlineMd(line.trim())}</p>`;
+    }
+
+    i++;
+  }
+
+  closeList();
+  return html;
+}
 async function sbFetch(path,opt={}){const headers={"apikey":C.anonKey,"Authorization":`Bearer ${C.anonKey}`,...(opt.headers||{})};return fetch(C.supabaseUrl+path,{...opt,headers})}
 async function invoke(name,body){const r=await sbFetch(`/functions/v1/${name}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const d=await r.json();if(!r.ok)throw new Error(d.error||`Supabase function failed (${r.status})`);return d}
 async function loadDocs(){
@@ -24,8 +128,9 @@ async function runQuery(){
   $("#answerStatus").textContent="Generating…";$("#answer").className="answer";$("#answer").textContent="Retrieved evidence successfully. Generating a source-grounded response…";
   const r=await fetch("/api/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:query,evidence:ret.results})});
   const d=await r.json();if(!r.ok)throw new Error(d.error||"Generation endpoint unavailable");
-  $("#answer").textContent=d.answer;$("#answerStatus").textContent=`Grounded · ${d.model}`;
- }catch(e){$("#answer").className="answer";$("#answer").textContent=`Retrieval/generation status:\n\n${e.message}\n\nIf retrieval succeeded but generation failed, configure OPENAI_API_KEY in Netlify. If the corpus is empty, open Database setup and initialize it.`;$("#answerStatus").textContent="Check setup"}
+  $("#answer").innerHTML=renderMarkdown(d.answer);
+$("#answerStatus").textContent=`Grounded · ${d.provider || "Groq"} · ${d.model}`;
+ }catch(e){$("#answer").className="answer";$("#answer").textContent=`Retrieval/generation status:\n\n${e.message}\n\nIf retrieval succeeded but generation failed, configure GROQ_API_KEY in Netlify. If the corpus is empty, open Database setup and initialize it.`;$("#answerStatus").textContent="Check setup"}
  finally{$("#run").disabled=false}
 }
 function renderEvidence(rows,meta){$("#retrievalStatus").textContent=`${rows.length} results · ${meta.latency_ms||"—"} ms`;$("#evidence").className=rows.length?"evidence":"evidence empty-evidence";$("#evidence").innerHTML=rows.length?rows.map((e,i)=>`<article class="ev"><div class="ev-top"><b>[E${i+1}] ${esc(e.source_name)}</b><span>RRF ${Number(e.hybrid_score||0).toFixed(4)}</span></div><h4>${esc(e.document_title)}</h4><p>${esc(e.chunk_text)}</p><div class="scores">PDF p.${e.page_start}${e.page_end!==e.page_start?`–${e.page_end}`:""} · semantic ${Number(e.semantic_similarity||0).toFixed(3)} · FTS ${Number(e.full_text_rank||0).toFixed(3)} · <a href="${esc(e.source_url)}" target="_blank" rel="noreferrer">source ↗</a></div></article>`).join(""):"No evidence returned."}
