@@ -9,7 +9,13 @@
 <body>
 <div class="shell">
 <aside>
-  <div class="brand"><img src="assets/logo.svg" alt=""><div><b>ESG RAG</b><span>Vector intelligence</span></div></div>
+  <div class="brand">
+  <img src="assets/logo.svg" alt="">
+  <div>
+    <b>ESG RAG Intelligence</b>
+    <span>Created by Parimal Bhakare</span>
+  </div>
+</div>
   <nav>
     <button class="nav active" data-view="research">Research assistant</button>
     <button class="nav" data-view="corpus">Corpus & provenance</button>
@@ -33,6 +39,58 @@
     </div>
     <div class="hero-kpis" id="heroKpis"></div>
   </div>
+  <section class="howto" aria-labelledby="howToTitle">
+  <div class="howto-head">
+    <span class="eyebrow">HOW TO USE THIS TOOL</span>
+    <h2 id="howToTitle">From question to evidence in three steps.</h2>
+    <p>
+      Use ESG RAG Intelligence to interrogate the indexed BRSR framework,
+      BRSR Core guidance and corporate ESG disclosures. The tool is designed
+      for evidence-led research, not as a replacement for the underlying reports.
+    </p>
+  </div>
+
+  <div class="howto-grid">
+
+    <article class="howto-step">
+      <span>01</span>
+      <h3>Ask a specific question</h3>
+      <p>
+        Ask about an ESG topic, regulatory requirement, company disclosure or
+        comparison. For example: “Compare Infosys and Reliance on
+        climate-related performance.”
+      </p>
+    </article>
+
+    <article class="howto-step">
+      <span>02</span>
+      <h3>Refine the research</h3>
+      <p>
+        Use the source and ESG-theme filters when you want to narrow the search.
+        For comparisons, name both companies and ask specifically about reporting
+        year, methodology, scope or boundary differences.
+      </p>
+    </article>
+
+    <article class="howto-step">
+      <span>03</span>
+      <h3>Verify the evidence</h3>
+      <p>
+        Material claims in the answer cite evidence IDs such as [E1] and [E2].
+        Review the Retrieval Trace, check the PDF page and use “source ↗” to
+        inspect the original disclosure.
+      </p>
+    </article>
+
+  </div>
+
+  <div class="use-note">
+    <strong>Research tip.</strong>
+    If the retrieved evidence is insufficient, broaden the filters or reformulate
+    the question. Absence from the retrieved evidence should not automatically be
+    interpreted as absence from the full source document.
+  </div>
+</section>
 
   <div class="workspace">
     <div class="card query-card">
@@ -48,14 +106,17 @@
     </div>
 
     <div class="card answer-card">
-      <div class="head"><div><span class="eyebrow">GROUNDED RESPONSE</span><h3>Analysis</h3></div><span id="answerStatus" class="status">Ready</span></div>
+      <div class="head"><div><span class="eyebrow">GROUNDED RESPONSE</span><h3>Executive analysis</h3></div><span id="answerStatus" class="status">Ready</span></div>
       <div id="answer" class="answer empty">The generated response will appear here. Claims must cite retrieved evidence IDs such as [E1] and [E2].</div>
-      <div class="answer-foot"><span>Generation uses a server-side OpenAI key; retrieval remains usable without it.</span><button id="copy">Copy</button></div>
+      <div class="answer-foot">
+  <span>Grounded generation by Groq. Answers use only retrieved evidence; always verify material claims against the cited source pages.</span>
+  <button id="copy">Copy</button>
+</div>
     </div>
   </div>
 
   <div class="card evidence-card">
-    <div class="head"><div><span class="eyebrow">RETRIEVAL TRACE</span><h3>Evidence supplied to generation</h3></div><span id="retrievalStatus" class="status">No query yet</span></div>
+    <div class="head"><div><span class="eyebrow">RETRIEVAL TRACE</span><h3>Retrieved evidence & source trace</h3></div><span id="retrievalStatus" class="status">No query yet</span></div>
     <div id="evidence" class="evidence empty-evidence">Run a query to inspect pgvector similarity, keyword relevance, RRF ranking, source document and PDF page.</div>
   </div>
 </section>
@@ -103,7 +164,10 @@
   </div>
 </section>
 
-<footer><span>ESG RAG Intelligence · portfolio research system</span><span>Public ESG disclosures · source-grounded · not investment advice</span></footer>
+<footer>
+  <span><strong>Created by Parimal Bhakare</strong> · ESG RAG Intelligence</span>
+  <span>Public ESG disclosures · evidence-grounded research · not investment advice</span>
+</footer>
 </main>
 </div>
 <script src="config.js"></script><script src="app.js"></script>
